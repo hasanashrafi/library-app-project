@@ -12,6 +12,17 @@ module.exports = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      fontFamily: {
+        "Vazir": "Vazir",
+        "VazirBlack": "Vazir Black",
+        "VazirBold": "Vazir Bold",
+        "VazirExtraBold": "Vazir ExtraBold",
+        "VazirLight": "Vazir Light",
+        "VazirMedium": "Vazir Medium",
+        "VazirSemiBold": "Vazir SemiBold",
+        "VazirThin": "Vazir Thin",
+        "VazirRegular": "Vazir Regular",
+      }
     },
   },
   plugins: [],
