@@ -6,6 +6,7 @@ function Layout({ children }) {
         <div>
             <header>
                 <Link href='/signup' >ثبت نام</Link>
+                <Link href='/signin' > ورود</Link>
             </header>
 
             {children}
