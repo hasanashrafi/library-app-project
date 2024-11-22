@@ -36,13 +36,13 @@ function SignInPage() {
 
         setLoading(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`, {
+            const response = await fetch(`http://localhost:3400/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             });
             const data = await response.json();
-            console.log(data)
+            
             
             if (response.ok) {
                 toast.success('ورود با موفقیت انجام شد');
