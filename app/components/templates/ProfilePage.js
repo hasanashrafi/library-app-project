@@ -2,57 +2,81 @@
 
 import { parseJwt } from '@/app/utils/jwt_decode';
 import Cookies from 'js-cookie';
-import React, { useEffect, useState } from 'react'
-import { CiSearch } from "react-icons/ci";
+import React, { useEffect, useState } from 'react';
+import BooksTable from '../modules/BooksTable';
+import AddBookModal from '../modules/AddBookModal';
+import SearchBar from '../modules/SearchBar';
+import Pagination from '../modules/Pagination';
 
-function ProfilePage() {
-    const [user, setUser] = useState({})
+function ProfilePage({ initialBooks }) {
+    const [user, setUser] = useState({});
+    const [book, setBook] = useState({ title: "", summary: "good", author: "hoda", price: "", quantity: "" });
+    const [closeModal, setCloseModal] = useState(false);
+    const [books, setBooks] = useState([initialBooks]);
+    const [page, setPage] = useState(1);
+
 
     useEffect(() => {
-        const token = Cookies.get('token'); // Replace 'token' with your cookie name
-        setUser(parseJwt(token))
-    }, []);
-    console.log(user)
+        const token = Cookies.get('token');
+        if (token) {
+            setUser(parseJwt(token));
+        }
+        fetchBooks();
+    }, [page, minPrice, maxPrice]);
 
-    const searchHandler = () => {
+    const fetchBooks = async () => {
+        const res = await fetch(`http://localhost:3400/book?page=${page}&limit=3&minPrice=${minPrice}&maxPrice=${maxPrice}`);
+        const data = await res.json();
+        setBooks(data);
+    };
 
-    }
+    const addHandler = async () => {
+        const res = await fetch('http://localhost:3400/book', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Cookies.get('token')}`
+            },
+            body: JSON.stringify(book)
+        });
+
+        if (res.ok) {
+            setCloseModal(false);
+            setBook({ title: "", quantity: "", price: "" });
+            fetchBooks(); // Fetch updated book list
+        } else {
+            console.error('Failed to add book');
+        }
+    };
 
     return (
         <div className='min-h-screen w-full max-w-7xl mx-auto p-10'>
-            <div className='bg-white border border-[#e9e9e9] rounded-2xl w-full my-3 p-2 flex items-center justify-between'>
-                <div className='flex items-center w-[80%] '>
-                    <label htmlFor='search' className='p-1.5' onClick={searchHandler}>
-                        <CiSearch className='text-2xl ' />
-                    </label>
-                    <input
-                        className='w-full outline-none p-2   '
-                        type='text'
-                        placeholder='جستجو کالا'
-                        id='search'
-                        name='search'
-                        onChange={searchHandler} />
-                </div>
-                <p className='flex items-center justify-around text-center p-2 w-[20%] border-r-2 border-gray-400 '>
-                    <img src='/images/felix-Vogel-4.png'
-                        className='size-8 rounded-full' />
-                    {user.username}
-                </p>
-            </div>
-            <div className=' p-2 flex items-center justify-between my-10'>
-                <p className='flex items-center gap-x-2 p-2 text-xl  '>
+            <SearchBar user={user} />
+            <div className='p-2 flex items-center justify-between my-10'>
+                <p className='flex items-center gap-x-2 p-2 text-xl'>
                     <img src="/images/setting-3.png" className='size-7' />
-                    مدیریت کتاب ها
+                    Manage Books
                 </p>
-                <button className='p-2 rounded-md text-white bg-[#F21055]'>افزودن کتاب</button>
-
+                <button onClick={() => setCloseModal(true)} className='p-2 rounded-md text-white bg-[#F21055]'>
+                    Add Book
+                </button>
             </div>
-
-            <div>
-                
-            </div>
+            <BooksTable books={books} />
+            <Pagination page={page} setPage={setPage} />
+            <AddBookModal book={book} setBook={setBook} closeModal={closeModal} setCloseModal={setCloseModal} addHandler={addHandler} />
         </div>
-    )
+    );
 }
 
-export default ProfilePage
+export default ProfilePage;
+
+export async function getServerSideProps() {
+    const res = await fetch('http://localhost:3400/book?page=1&limit=3');
+    const initialBooks = await res.json();
+
+    return {
+        props: {
+            initialBooks,
+        },
+    };
+}
